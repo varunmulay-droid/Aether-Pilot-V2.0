@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Aether Pilot</title>
+    <title>Aether Pilot (PC)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
     <script src="https://unpkg.com/tone@14.9.14/build/Tone.js"></script>
@@ -36,67 +36,13 @@
             height: 100%;
         }
 
-        #controls {
+        #score-display {
             position: absolute;
-            bottom: 20px;
-            left: 0;
-            right: 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-            user-select: none;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        
-        @media (max-width: 640px) {
-            #controls {
-                flex-direction: column;
-                justify-content: center;
-                gap: 20px;
-            }
-        }
-
-        .control-button {
-            background: rgba(0, 255, 255, 0.2);
-            backdrop-filter: blur(5px);
-            border: 2px solid #0ff;
-            border-radius: 15px;
-            color: #0ff;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 24px;
-            padding: 15px 25px;
-            cursor: pointer;
-            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
-            transition: all 0.3s ease;
-            touch-action: manipulation;
-        }
-
-        .control-button:active {
-            transform: scale(0.95);
-            box-shadow: 0 0 5px rgba(0, 255, 255, 0.8);
-        }
-
-        #thrust-button {
-            background: rgba(255, 0, 255, 0.2);
-            border-color: #f0f;
-            color: #f0f;
-            box-shadow: 0 0 15px rgba(255, 0, 255, 0.5);
-        }
-        
-        #shoot-button {
-            background: rgba(255, 255, 0, 0.2);
-            border-color: #ff0;
-            color: #ff0;
-            box-shadow: 0 0 15px rgba(255, 255, 0, 0.5);
-        }
-
-        #brake-button {
-            background: rgba(100, 100, 255, 0.2);
-            border-color: #66f;
-            color: #66f;
-            box-shadow: 0 0 15px rgba(100, 100, 255, 0.5);
+            top: 20px;
+            left: 20px;
+            font-size: 36px;
+            font-weight: bold;
+            text-shadow: 0 0 10px #0ff;
         }
 
         #game-overlay {
@@ -112,15 +58,6 @@
             align-items: center;
             text-align: center;
             z-index: 10;
-        }
-
-        #score-display {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            font-size: 36px;
-            font-weight: bold;
-            text-shadow: 0 0 10px #0ff;
         }
 
         h1 {
@@ -175,41 +112,6 @@
             font-size: 2.5em;
             margin-bottom: 20px;
         }
-
-        #joystick-container {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            width: 120px;
-            height: 120px;
-            background: rgba(0, 255, 255, 0.2);
-            border: 2px solid #0ff;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
-            touch-action: none;
-        }
-        
-        @media (max-width: 640px) {
-            #joystick-container {
-                position: relative;
-                left: unset;
-                bottom: unset;
-                margin-top: 20px;
-            }
-        }
-
-
-        #joystick {
-            width: 60px;
-            height: 60px;
-            background: rgba(0, 255, 255, 0.6);
-            border-radius: 50%;
-            touch-action: none;
-            cursor: pointer;
-        }
     </style>
 </head>
 <body>
@@ -217,20 +119,12 @@
         <div id="game-overlay">
             <div id="message-box">
                 <h2>Aether Pilot</h2>
-                <p>Use the joystick to steer and hold the thrust button to fly!</p>
+                <p>Use WASD to steer, Spacebar to thrust, B to brake, and Z to shoot.</p>
                 <button id="start-button" class="action-button">Start Game</button>
             </div>
         </div>
         <div id="score-display">Score: 0</div>
         <canvas id="game-canvas"></canvas>
-        <div id="controls">
-            <div id="joystick-container">
-                <div id="joystick"></div>
-            </div>
-            <button id="thrust-button" class="control-button">🚀</button>
-            <button id="brake-button" class="control-button">Brake</button>
-            <button id="shoot-button" class="control-button">💥</button>
-        </div>
     </div>
 
     <script>
@@ -288,90 +182,32 @@
             const startButton = document.getElementById('start-button');
             const scoreDisplay = document.getElementById('score-display');
             const messageBox = document.getElementById('message-box');
-            const thrustButton = document.getElementById('thrust-button');
-            const brakeButton = document.getElementById('brake-button');
-            const shootButton = document.getElementById('shoot-button');
-            const joystickContainer = document.getElementById('joystick-container');
-            const joystick = document.getElementById('joystick');
             const cameraTarget = new THREE.Vector3();
-            const joystickRadius = joystickContainer.offsetWidth / 2;
 
             // --- Event Listeners ---
             startButton.addEventListener('click', startGame);
             window.addEventListener('resize', onWindowResize, false);
             
-            // Joystick events
-            joystickContainer.addEventListener('touchstart', handleJoystickStart, { passive: false });
-            joystickContainer.addEventListener('touchmove', handleJoystickMove, { passive: false });
-            joystickContainer.addEventListener('touchend', handleJoystickEnd, { passive: false });
-
-            // Thrust events
-            thrustButton.addEventListener('touchstart', (e) => { e.preventDefault(); isThrusting = true; });
-            thrustButton.addEventListener('touchend', (e) => { e.preventDefault(); isThrusting = false; });
-            
-            // Brake events
-            brakeButton.addEventListener('touchstart', (e) => { e.preventDefault(); isBraking = true; });
-            brakeButton.addEventListener('touchend', (e) => { e.preventDefault(); isBraking = false; });
-
-            // Shoot events
-            shootButton.addEventListener('touchstart', (e) => { e.preventDefault(); shoot(); });
-
             // Keyboard controls for desktop
             document.addEventListener('keydown', (e) => {
                 if (gameState.playing) {
-                    if (e.key === 'ArrowUp' || e.key === 'w') horizontalInput.z = -1;
-                    if (e.key === 'ArrowDown' || e.key === 's') horizontalInput.z = 1;
-                    if (e.key === 'ArrowLeft' || e.key === 'a') horizontalInput.x = -1;
-                    if (e.key === 'ArrowRight' || e.key === 'd') horizontalInput.x = 1;
+                    if (e.key === 'w' || e.key === 'W') horizontalInput.z = -1;
+                    if (e.key === 's' || e.key === 'S') horizontalInput.z = 1;
+                    if (e.key === 'a' || e.key === 'A') horizontalInput.x = -1;
+                    if (e.key === 'd' || e.key === 'D') horizontalInput.x = 1;
                     if (e.key === ' ') isThrusting = true;
-                    if (e.key === 'b') isBraking = true;
-                    if (e.key === 'z') shoot();
+                    if (e.key === 'b' || e.key === 'B') isBraking = true;
+                    if (e.key === 'z' || e.key === 'Z') shoot();
                 }
             });
             document.addEventListener('keyup', (e) => {
                 if (gameState.playing) {
-                    if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'ArrowDown' || e.key === 's') horizontalInput.z = 0;
-                    if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'ArrowRight' || e.key === 'd') horizontalInput.x = 0;
+                    if (e.key === 'w' || e.key === 'W' || e.key === 's' || e.key === 'S') horizontalInput.z = 0;
+                    if (e.key === 'a' || e.key === 'A' || e.key === 'd' || e.key === 'D') horizontalInput.x = 0;
                     if (e.key === ' ') isThrusting = false;
-                    if (e.key === 'b') isBraking = false;
+                    if (e.key === 'b' || e.key === 'B') isBraking = false;
                 }
             });
-
-            // --- Joystick Functions ---
-            function handleJoystickStart(e) {
-                e.preventDefault();
-                handleJoystickMove(e);
-            }
-
-            function handleJoystickMove(e) {
-                e.preventDefault();
-                if (!gameState.playing) return;
-                const touch = e.touches[0];
-                const rect = joystickContainer.getBoundingClientRect();
-                const centerX = rect.left + rect.width / 2;
-                const centerY = rect.top + rect.height / 2;
-
-                let dx = touch.clientX - centerX;
-                let dy = touch.clientY - centerY;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-
-                if (dist > joystickRadius) {
-                    dx = (dx / dist) * joystickRadius;
-                    dy = (dy / dist) * joystickRadius;
-                }
-
-                joystick.style.transform = `translate(${dx}px, ${dy}px)`;
-
-                horizontalInput.x = dx / joystickRadius;
-                horizontalInput.z = dy / joystickRadius;
-            }
-
-            function handleJoystickEnd(e) {
-                e.preventDefault();
-                joystick.style.transform = `translate(0, 0)`;
-                horizontalInput.x = 0;
-                horizontalInput.z = 0;
-            }
 
             // --- Haptic Feedback Function ---
             function vibrate(ms) {
